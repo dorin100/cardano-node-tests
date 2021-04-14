@@ -20,10 +20,11 @@ jobs:
             pip install psutil
             pip install sqlite-utils>=2.18
             sqlite-utils --version
-            pip install pandas
       - run:
           name: run sync test
           command: |
+            dir
+            echo "pwd: $pwd"
             python cardano-node-tests/sync_tests/sync_test2.py -t1 "1.26.1" -e "shelley_qa"
       - store_artifacts:
           path: cardano-node-tests/logfile.log
