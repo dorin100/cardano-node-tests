@@ -25,7 +25,7 @@ jobs:
           command: |
             echo $PWD
             ls -d */
-            python /c/Users/circleci/project/cardano-node-tests/sync_tests/sync_test2.py -t1 "1.26.1" -e "shelley_qa"
+            python /c/Users/circleci/project/sync_tests/sync_test2.py -t1 "1.26.1" -e "shelley_qa"
       - store_artifacts:
           path: cardano-node-tests/logfile.log
           destination: node_logs
