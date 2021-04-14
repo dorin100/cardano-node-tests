@@ -2,20 +2,31 @@ version: 2.1
 
 orbs:
   python: circleci/python@0.2.1
+  win: circleci/windows@2.2.0
 
 jobs:
-  build-and-test:
-    executor: python/default
+  sync_test:
+    working_directory: aaa
+    executor: win/default
     steps:
-      - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
       - run:
-          command: ./manage.py test
-          name: Test
+          name: checkout node-tests repo
+          command: checkout
+      - run:
+          echo "this is the build job"
+      - run:
+          name: install python dependencies
+          command: |
+            pip install requests
+            pip install psutil
+            pip install sqlite-utils>=2.18
+            sqlite-utils --version
+            pip install pandas
+      - store_artifacts:
+          path: cardano-node-tests/logfile.log
+          destination: node_logs
 
 workflows:
   main:
     jobs:
-      - build-and-test
+      - sync_test
