@@ -10,10 +10,7 @@ jobs:
       size: "medium" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
       shell: bash.exe
     steps:
-      - run:
-          name: checkout node-tests repo
-          command: checkout
-      - run: systeminfo
+      - checkout
       - run:
           echo "this is the build job"
       - run:
