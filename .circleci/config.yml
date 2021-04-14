@@ -22,6 +22,7 @@ jobs:
             sqlite-utils --version
       - run:
           name: run sync test
+          no_output_timeout: 240m
           command: |
             echo $PWD
             ls -d */
