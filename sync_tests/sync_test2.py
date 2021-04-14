@@ -30,6 +30,8 @@ def set_repo_paths():
 
     ROOT_TEST_PATH = Path.cwd()
 
+    print(f"ROOT_TEST_PATH: {ROOT_TEST_PATH}")
+
     # os.chdir("cardano-node")
     # CARDANO_NODE_PATH = Path.cwd()
     #
