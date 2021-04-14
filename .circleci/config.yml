@@ -23,8 +23,8 @@ jobs:
       - run:
           name: run sync test
           command: |
-            dir
-            echo "pwd: $pwd"
+            echo "pwd: ${pwd}"
+            echo $PWD
             python cardano-node-tests/sync_tests/sync_test2.py -t1 "1.26.1" -e "shelley_qa"
       - store_artifacts:
           path: cardano-node-tests/logfile.log
