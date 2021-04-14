@@ -9,7 +9,6 @@ jobs:
       name: win/default # executor type
       size: "medium" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
       shell: bash.exe
-    shell: powershell.exe
     steps:
       - run:
           name: checkout node-tests repo
