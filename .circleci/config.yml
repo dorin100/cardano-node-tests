@@ -64,7 +64,7 @@ workflows:
               os: [ linux, macos, windows ]
 #              env: [shelley_qa, testnet, staging, mainnet]
               env: [shelley_qa]
-              aaa: [ true, true, false]
+#              aaa: [ true, true, false]
           name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
 #          post-steps: # steps to run after steps defined in the job bar
 #            - run:
