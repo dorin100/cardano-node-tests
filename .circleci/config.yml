@@ -56,8 +56,8 @@ workflows:
       - sync_test
           matrix:
             parameters:
-              env: ["shelley_qa", "testnet", "staging", "mainnet"]
-              os: [macos, linux]
+              os: [ macos, linux ]
+              env: [shelley_qa, testnet, staging, mainnet]
 #          post-steps: # steps to run after steps defined in the job bar
 #            - run:
 #                command: echo "upload artifact to s3"
