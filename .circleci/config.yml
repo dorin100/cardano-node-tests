@@ -12,8 +12,7 @@ executors:
     macos:
       xcode: 11.3.0
 #      resource_class: large
-#  windows:
-#    name: win/default
+  windows: win/default
 #    size: "xlarge" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
 #    shell: bash.exe
 
@@ -49,7 +48,7 @@ jobs:
             ls -d */
             python ./sync_tests/sync_test2.py -t1 "1.26.1" -e env
       - store_artifacts:
-          path: /c/Users/circleci/project/sync_tests/logfile.log
+          path: ./sync_tests/logfile.log
           destination: node_logs
 
 workflows:
