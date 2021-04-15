@@ -11,6 +11,21 @@ parameters:
     type: string
     default: None
 
+commands:
+  install_python_libraries:
+    description: "Install Python libraries based on OS type"
+    shell: bash.exe
+    parameters:
+      os_type:
+        type: string
+    steps:
+      - run:
+          command: |
+            pip install requests
+            pip install psutil
+            pip install sqlite-utils>=2.18
+            sqlite-utils --version
+
 executors:
   linux:
     machine:
@@ -33,14 +48,9 @@ jobs:
     executor: << parameters.os >>
     working_directory: ~/repo
     steps:
-      - run:
-          name: install python3 dependencies
-          shell: bash.exe
-          command: |
-            pip install requests
-            pip install psutil
-            pip install sqlite-utils>=2.18
-            sqlite-utils --version
+      - checkout
+      - install_python_libraries:
+          os_type: << parameters.os >>
       - run:
           name: run sync test
           no_output_timeout: 120m
