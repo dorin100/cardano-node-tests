@@ -37,9 +37,9 @@ jobs:
           name: install python3 dependencies
           shell: bash.exe
           command: |
-            pip3 install requests
-            pip3 install psutil
-            pip3 install sqlite-utils>=2.18
+            pip install requests
+            pip install psutil
+            pip install sqlite-utils>=2.18
             sqlite-utils --version
       - run:
           name: run sync test
