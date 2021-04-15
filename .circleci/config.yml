@@ -32,14 +32,16 @@ jobs:
         type: string
     executor: << parameters.os >>
     working_directory: ~/repo
+    when:
+     condition:
+        equal: [ "windows",  << parameters.os >>]
+        shell: bash.exe
     steps:
       - checkout
       - run:
-          echo "this is the build job"
-      - run:
           name: install python3 dependencies
           command: |
-            echo $executor
+            echo << parameters.os >>
             pip3 install requests
             pip3 install psutil
             pip3 install sqlite-utils>=2.18
