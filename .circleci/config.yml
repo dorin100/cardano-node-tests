@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   win: circleci/windows@2.2.0
+  python: circleci/python@0.3.2
 
 parameters:
   tag_no1:
@@ -36,13 +37,13 @@ jobs:
       - checkout
       - run:
           echo "this is the build job"
-      - run:
-          name: install python3 dependencies
-          command: |
-            pip3 install requests
-            pip3 install psutil
-            pip3 install sqlite-utils>=2.18
-            sqlite-utils --version
+#      - run:
+#          name: install python3 dependencies
+#          command: |
+#            pip3 install requests
+#            pip3 install psutil
+#            pip3 install sqlite-utils>=2.18
+#            sqlite-utils --version
       - run:
           name: run sync test
           no_output_timeout: 120m
