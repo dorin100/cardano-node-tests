@@ -32,16 +32,11 @@ jobs:
         type: string
     executor: << parameters.os >>
     working_directory: ~/repo
-    when:
-     condition:
-        equal: [ "windows",  << parameters.os >>]
-        shell: bash.exe
     steps:
-      - checkout
       - run:
           name: install python3 dependencies
+          shell: bash.exe
           command: |
-            echo << parameters.os >>
             pip3 install requests
             pip3 install psutil
             pip3 install sqlite-utils>=2.18
@@ -69,6 +64,7 @@ workflows:
               os: [ linux, macos, windows ]
 #              env: [shelley_qa, testnet, staging, mainnet]
               env: [shelley_qa]
+              aaa: [ true, true, false]
           name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
 #          post-steps: # steps to run after steps defined in the job bar
 #            - run:
