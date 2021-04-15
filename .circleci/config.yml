@@ -3,12 +3,29 @@ version: 2.1
 orbs:
   win: circleci/windows@2.2.0
 
+executors:
+  linux:
+    machine:
+      image: ubuntu-2004:202010-01
+#    resource_class: xlarge
+  macos:
+    macos:
+      xcode: 11.3.0
+#      resource_class: large
+#  windows:
+#    executor:
+#      name: win/default
+#    size: "xlarge" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
+#    shell: bash.exe
+
 jobs:
   sync_test:
-    executor:
-      name: win/default # executor type
-      size: "medium" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
-      shell: bash.exe
+    parameters:
+      os:
+        type: executor
+      env:
+        type: string
+    executor: << parameters.os >>
     steps:
       - checkout
       - run:
@@ -26,27 +43,34 @@ jobs:
           command: |
             echo $PWD
             ls -d */
-            python /c/Users/circleci/project/sync_tests/sync_test2.py -t1 "1.26.1" -e "shelley_qa"
-      - run:
-          name: commit and push DB changes for the sync test
-          command: |
-            cd /c/Users/circleci/project/
-            git config --global user.name "sync_tests"
-            git config --global user.email "action@github.com"
-            git config pull.rebase true
-            git pull origin master
-
-            python sync_tests/write_values_to_db.py -e "shelley_qa"
-
-            git add sync_tests/sync_results.db
-            git add sync_tests/csv_files
-            git commit -m "added sync values for tag_no1 tag_no2 - shelley_qa - windows"
-            git push origin master
+            python /c/Users/circleci/project/sync_tests/sync_test2.py -t1 "1.26.1" -e << parameters.env >>
+#      - run:
+#          name: commit and push DB changes for the sync test
+#          command: |
+#            cd /c/Users/circleci/project/
+#            git config --global user.name "sync_tests"
+#            git config --global user.email "action@github.com"
+#            git config pull.rebase true
+#            git pull origin master
+#
+#            python sync_tests/write_values_to_db.py -e "shelley_qa"
+#
+#            git add sync_tests/sync_results.db
+#            git add sync_tests/csv_files
+#            git commit -m "added sync values for tag_no1 tag_no2 - shelley_qa - windows"
+#            git push origin master
       - store_artifacts:
           path: /c/Users/circleci/project/sync_tests/logfile.log
           destination: node_logs
 
 workflows:
-  main:
+  all-tests:
     jobs:
       - sync_test
+          matrix:
+            parameters:
+              env: ["shelley_qa", "testnet", "staging", "mainnet"]
+              os: ["macos", "linux"]
+#          post-steps: # steps to run after steps defined in the job bar
+#            - run:
+#                command: echo "upload artifact to s3"

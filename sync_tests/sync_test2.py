@@ -434,7 +434,9 @@ def get_size(start_path='.'):
 def wait_for_node_to_sync(env, tag_no):
     sync_details_dict = OrderedDict()
     count = 0
-    last_byron_slot_no, last_shelley_slot_no, last_allegra_slot_no, latest_slot_no = get_calculated_slot_no(env)
+    # last_byron_slot_no, last_shelley_slot_no, last_allegra_slot_no, latest_slot_no = get_calculated_slot_no(env)
+
+    last_byron_slot_no, last_shelley_slot_no, last_allegra_slot_no, latest_slot_no = 10000, 30000, 40000, 50000
 
     actual_slot_no = get_current_tip(tag_no)[2]
     start_sync = time.perf_counter()
