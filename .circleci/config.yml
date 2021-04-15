@@ -20,6 +20,7 @@ commands:
     steps:
       - run:
           command: |
+            echo "aaaaaaa is: ${os_type}"
             pip install requests
             pip install psutil
             pip install sqlite-utils>=2.18
