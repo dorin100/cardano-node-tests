@@ -22,7 +22,7 @@ jobs:
   sync_test:
     parameters:
       os:
-        type: executor
+        type: string
       env:
         type: string
     executor: << parameters.os >>
@@ -51,13 +51,14 @@ jobs:
           destination: node_logs
 
 workflows:
-  all-tests:
+  build:
     jobs:
       - sync_test
           matrix:
             parameters:
-              os: [ macos, linux ]
+              os: [ linux, macos ]
               env: [shelley_qa, testnet, staging, mainnet]
+            name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
 #          post-steps: # steps to run after steps defined in the job bar
 #            - run:
 #                command: echo "upload artifact to s3"
