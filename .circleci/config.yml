@@ -7,7 +7,7 @@ jobs:
   sync_test:
     executor:
       name: win/default # executor type
-      size: "medium" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
+      size: "2xlarge" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
       shell: bash.exe
     steps:
       - checkout
@@ -28,7 +28,7 @@ jobs:
             ls -d */
             python /c/Users/circleci/project/sync_tests/sync_test2.py -t1 "1.26.1" -e "mainnet"
       - store_artifacts:
-          path: cardano-node-tests/logfile.log
+          path: /c/Users/circleci/project/sync_tests/logfile.log
           destination: node_logs
 
 workflows:
