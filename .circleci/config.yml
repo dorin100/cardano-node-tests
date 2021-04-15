@@ -21,8 +21,8 @@ executors:
       xcode: 11.3.0
 #      resource_class: large
   windows:
-    name: win/default
-    shell: bash.exe
+    executor: win/default
+      shell: bash.exe
 #    size: "xlarge" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
 
 jobs:
@@ -67,7 +67,8 @@ workflows:
           matrix:
             parameters:
               os: [ linux, macos, windows ]
-              env: [shelley_qa, testnet, staging, mainnet]
+#              env: [shelley_qa, testnet, staging, mainnet]
+              env: [shelley_qa]
           name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
 #          post-steps: # steps to run after steps defined in the job bar
 #            - run:
