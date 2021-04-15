@@ -10,6 +10,9 @@ parameters:
   tag_no2:
     type: string
     default: None
+  command_to_execute:
+    type: string
+    default: "pip3 install requests & pip3 install psutil & pip3 install sqlite-utils>=2.18 & sqlite-utils --version"
 
 executors:
   linux:
@@ -33,14 +36,18 @@ jobs:
     executor: << parameters.os >>
     working_directory: ~/repo
     steps:
-      - run:
-          name: install python3 dependencies
+      - when:
+          condition: <<parameters.is_unix_based>>
+          steps:
+            name: "Run for unix based"
+            command: |
+              << pipeline.parameters.command_to_execute >>
+      - unless:
+          steps:
+            name: "Run for windows"
+            command: |
+              << pipeline.parameters.command_to_execute >>
           shell: bash.exe
-          command: |
-            pip3 install requests
-            pip3 install psutil
-            pip3 install sqlite-utils>=2.18
-            sqlite-utils --version
       - run:
           name: run sync test
           no_output_timeout: 120m
@@ -64,7 +71,7 @@ workflows:
               os: [ linux, macos, windows ]
 #              env: [shelley_qa, testnet, staging, mainnet]
               env: [shelley_qa]
-#              aaa: [ true, true, false]
+              is_unix_based: [ true, true, false]
           name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
 #          post-steps: # steps to run after steps defined in the job bar
 #            - run:
