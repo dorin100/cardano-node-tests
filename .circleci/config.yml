@@ -19,7 +19,6 @@ commands:
         type: string
     steps:
       - run:
-          shell: bash.exe
           command: |
             pip install requests
             pip install psutil
