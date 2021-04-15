@@ -57,7 +57,7 @@ workflows:
       - sync_test:
           matrix:
             parameters:
-              os: [ linux, macos ]
+              os: [ linux, macos, windows ]
               env: [shelley_qa, testnet, staging, mainnet]
           name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
 #          post-steps: # steps to run after steps defined in the job bar
