@@ -37,9 +37,9 @@ jobs:
       - run:
           echo "this is the build job"
       - run:
-          echo $executor
           name: install python3 dependencies
           command: |
+            echo $executor
             pip3 install requests
             pip3 install psutil
             pip3 install sqlite-utils>=2.18
