@@ -25,6 +25,7 @@ jobs:
       env:
         type: string
     executor: << parameters.os >>
+    working_directory: ~/project
     steps:
       - checkout
       - run:
@@ -41,10 +42,12 @@ jobs:
           no_output_timeout: 120m
           env: << parameters.env >>
           command: |
-            echo env
+            echo $env
             echo $PWD
+            echo $HOME
+            echo $working_directory
             ls -d */
-            python /c/Users/circleci/project/sync_tests/sync_test2.py -t1 "1.26.1" -e env
+            python ./sync_tests/sync_test2.py -t1 "1.26.1" -e env
       - store_artifacts:
           path: /c/Users/circleci/project/sync_tests/logfile.log
           destination: node_logs
