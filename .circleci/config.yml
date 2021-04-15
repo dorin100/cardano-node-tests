@@ -20,7 +20,8 @@ commands:
     steps:
       - run:
           command: |
-            echo "aaaaaaa is: ${os_type}"
+            echo "aaaaaaa111 is: ${os_type}"
+            echo "aaaaaaa222 is: << parameters.os >>"
             pip install requests
             pip install psutil
             pip install sqlite-utils>=2.18
