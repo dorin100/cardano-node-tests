@@ -12,9 +12,8 @@ executors:
     macos:
       xcode: 11.3.0
 #      resource_class: large
-#  windows:
-#    executor:
-#      name: win/default
+  windows:
+    name: win/default
 #    size: "xlarge" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
 #    shell: bash.exe
 
@@ -53,12 +52,12 @@ jobs:
 workflows:
   build:
     jobs:
-      - sync_test
+      - sync_test:
           matrix:
             parameters:
               os: [ linux, macos ]
               env: [shelley_qa, testnet, staging, mainnet]
-            name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
+          name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
 #          post-steps: # steps to run after steps defined in the job bar
 #            - run:
 #                command: echo "upload artifact to s3"
