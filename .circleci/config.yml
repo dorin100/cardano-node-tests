@@ -22,7 +22,6 @@ executors:
 #      resource_class: large
   windows:
     executor: win/default
-      shell: bash.exe
 #    size: "xlarge" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
 
 jobs:
