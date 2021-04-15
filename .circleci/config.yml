@@ -7,7 +7,7 @@ jobs:
   sync_test:
     executor:
       name: win/default # executor type
-      size: "xlarge" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
+      size: "medium" # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified
       shell: bash.exe
     steps:
       - checkout
@@ -26,7 +26,22 @@ jobs:
           command: |
             echo $PWD
             ls -d */
-            python /c/Users/circleci/project/sync_tests/sync_test2.py -t1 "1.26.1" -e "mainnet"
+            python /c/Users/circleci/project/sync_tests/sync_test2.py -t1 "1.26.1" -e "shelley_qa"
+      - run:
+          name: commit and push DB changes for the sync test
+          command: |
+            cd /c/Users/circleci/project/
+            git config --global user.name "sync_tests"
+            git config --global user.email "action@github.com"
+            git config pull.rebase true
+            git pull origin master
+
+            python sync_tests/write_values_to_db.py -e "shelley_qa"
+
+            git add sync_tests/sync_results.db
+            git add sync_tests/csv_files
+            git commit -m "added sync values for tag_no1 tag_no2 - shelley_qa - windows"
+            git push origin master
       - store_artifacts:
           path: /c/Users/circleci/project/sync_tests/logfile.log
           destination: node_logs
