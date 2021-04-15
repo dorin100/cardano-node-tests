@@ -14,12 +14,12 @@ parameters:
 commands:
   install_python_libraries:
     description: "Install Python libraries based on OS type"
-    shell: bash.exe
     parameters:
       os_type:
         type: string
     steps:
       - run:
+          shell: bash.exe
           command: |
             pip install requests
             pip install psutil
