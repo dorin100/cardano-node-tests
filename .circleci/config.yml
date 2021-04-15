@@ -23,7 +23,7 @@ commands:
             equal: [ "windows", << parameters.os_type >> ]
           steps:
           - run:
-              name: "Install Python libraries based on OS type"
+              name: "Install Python libraries on Windows executor"
               command: |
                 echo "Executor type: << parameters.os_type >>"
                 pip install requests
@@ -31,14 +31,19 @@ commands:
                 pip install sqlite-utils>=2.18
                 sqlite-utils --version
               shell: bash.exe
-      - run:
-          name: "Install Python libraries based on OS type"
-          command: |
-            echo "Executor type: << parameters.os_type >>"
-            pip3 install requests
-            pip3 install psutil
-            pip3 install sqlite-utils>=2.18
-            sqlite-utils --version
+      - when:
+          condition:
+            not:
+              equal: [ "windows", << parameters.os_type >> ]
+          steps:
+            - run:
+                name: "Install Python libraries on non Windows executor"
+                command: |
+                  echo "Executor type: << parameters.os_type >>"
+                  pip3 install requests
+                  pip3 install psutil
+                  pip3 install sqlite-utils>=2.18
+                  sqlite-utils --version
 
   run_sync_tests:
     description: "Trigger the sync tests based on OS type"
@@ -48,14 +53,26 @@ commands:
       env_type:
         type: string
     steps:
-      - run:
-          name: "Trigger the sync tests based on OS type"
-          command: |
-            if [[ << parameters.os_type >> == "windows" ]]; then
-              python ./sync_tests/sync_test2.py -t1 << pipeline.parameters.tag_no1 >> -t2 << pipeline.parameters.tag_no2 >> -e << parameters.env_type >>
-            else
-              python3 ./sync_tests/sync_test2.py -t1 << pipeline.parameters.tag_no1 >> -t2 << pipeline.parameters.tag_no2 >> -e << parameters.env_type >>
-            fi
+      - when:
+          condition:
+            equal: [ "windows", << parameters.os_type >> ]
+          steps:
+            - run:
+                name: "Trigger the sync tests on Windows executor"
+                command: |
+                  echo "Executor type: << parameters.os_type >>"
+                  python ./sync_tests/sync_test2.py -t1 << pipeline.parameters.tag_no1 >> -t2 << pipeline.parameters.tag_no2 >> -e << parameters.env_type >>
+                shell: bash.exe
+      - when:
+          condition:
+            not:
+              equal: [ "windows", << parameters.os_type >> ]
+          steps:
+            - run:
+                name: "Trigger the sync tests on non Windows executor"
+                command: |
+                  echo "Executor type: << parameters.os_type >>"
+                  python3 ./sync_tests/sync_test2.py -t1 << pipeline.parameters.tag_no1 >> -t2 << pipeline.parameters.tag_no2 >> -e << parameters.env_type >>
 
 executors:
   linux:
