@@ -71,7 +71,7 @@ workflows:
           matrix:
             parameters:
 #              os: [ linux, macos, windows ]
-              os: [ windows ]
+              os: [ linux ]
 #              env: [shelley_qa, testnet, staging, mainnet]
               env: [shelley_qa]
           name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
