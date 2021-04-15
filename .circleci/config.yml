@@ -70,7 +70,7 @@ workflows:
           matrix:
             parameters:
               env: ["shelley_qa", "testnet", "staging", "mainnet"]
-              os: ["macos", "linux"]
+              os: [macos, linux]
 #          post-steps: # steps to run after steps defined in the job bar
 #            - run:
 #                command: echo "upload artifact to s3"
