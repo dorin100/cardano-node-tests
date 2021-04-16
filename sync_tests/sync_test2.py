@@ -275,6 +275,9 @@ def get_current_tip(tag_no, wait=False):
                 .strip()
         )
         output_json = json.loads(output)
+
+        print(f"output_json: {output_json}")
+
         return int(output_json["epoch"]), int(output_json["block"]), output_json["hash"], \
                int(output_json["slot"], output_json["era"])
     except subprocess.CalledProcessError as e:
