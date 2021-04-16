@@ -112,6 +112,9 @@ def get_and_extract_node_files(tag_no):
     commit_sha = git_get_commit_sha_for_tag_no(tag_no)
     eval_url = git_get_hydra_eval_link_for_commit_sha(commit_sha)
 
+    # TO DO - remove below line
+    eval_url = "https://hydra.iohk.io/eval/1044305"
+
     print(f"commit_sha  : {commit_sha}")
     print(f"eval_url    : {eval_url}")
 
@@ -425,7 +428,7 @@ def get_size(start_path='.'):
 
 
 def wait_for_node_to_sync(env, tag_no):
-    sync_details_dict = OrderedDict()
+    eras_start_time_dict = OrderedDict()
     count = 0
     # last_byron_slot_no, last_shelley_slot_no, last_allegra_slot_no, latest_slot_no = get_calculated_slot_no(env)
 
@@ -441,7 +444,11 @@ def wait_for_node_to_sync(env, tag_no):
               f" - actual_epoch: {actual_epoch} "
               f" - actual_block: {actual_block} "
               f" - actual_slot : {actual_slot}")
-        time.sleep(5)
+        if actual_era not in eras_start_time_dict:
+            current_time = datetime.utcnow()
+            eras_start_time_dict[actual_era] = current_time
+
+        time.sleep(1)
         count += 1
 
         actual_epoch, actual_block, actual_hash, actual_slot, actual_era = get_current_tip(tag_no)
@@ -461,7 +468,7 @@ def wait_for_node_to_sync(env, tag_no):
     mary_sync_time_seconds = sync_time_seconds
 
     return newest_chunk, byron_sync_time_seconds, shelley_sync_time_seconds, \
-           allegra_sync_time_seconds, mary_sync_time_seconds, sync_details_dict
+           allegra_sync_time_seconds, mary_sync_time_seconds, eras_start_time_dict
 
 
 def date_diff_in_seconds(dt2, dt1):
@@ -586,6 +593,12 @@ def main():
         mary_sync_time_seconds1,
         sync_details_dict1
     ) = wait_for_node_to_sync(env, tag_no1)
+
+    print("++++++++++++++++++++++++++++++++++++++++++++++")
+    print(f"sync_details_dict1: {sync_details_dict1}")
+    for era in sync_details_dict1:
+        print(f"{era} --> {sync_details_dict1[era]}")
+    print("++++++++++++++++++++++++++++++++++++++++++++++")
 
     end_sync_time1 = get_current_date_time()
     print(f"secs_to_start1            : {secs_to_start1}")
