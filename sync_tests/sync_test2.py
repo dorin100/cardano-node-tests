@@ -282,7 +282,7 @@ def get_current_tip(tag_no, wait=False):
         print(f"output_json: {output_json}")
 
         return output_json["epoch"], int(output_json["block"]), output_json["hash"], \
-               int(output_json["slot"], output_json["era"])
+               int(output_json["slot"]), output_json["era"]
     except subprocess.CalledProcessError as e:
         if wait:
             return int(e.returncode)
