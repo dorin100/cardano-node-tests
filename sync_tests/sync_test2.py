@@ -281,6 +281,9 @@ def get_current_tip(tag_no, wait=False):
 
         print(f"output_json: {output_json}")
 
+        if output_json["epoch"] is not None:
+            output_json["epoch"] = int(output_json["epoch"])
+
         return output_json["epoch"], int(output_json["block"]), output_json["hash"], \
                int(output_json["slot"]), output_json["era"]
     except subprocess.CalledProcessError as e:
@@ -430,13 +433,13 @@ def get_size(start_path='.'):
 def wait_for_node_to_sync(env, tag_no):
     eras_start_time_dict = OrderedDict()
     count = 0
-    # last_byron_slot_no, last_shelley_slot_no, last_allegra_slot_no, latest_slot_no = get_calculated_slot_no(env)
 
-    # last_byron_slot_no, last_shelley_slot_no, last_allegra_slot_no, latest_slot_no = 100000, 300000, 400000, 600000
+    # TODO: remove below line
+    # latest_slot_no = get_calculated_slot_no(env)
+    latest_slot_no = 20877064
 
     actual_epoch, actual_block, actual_hash, actual_slot, actual_era = get_current_tip(tag_no)
 
-    latest_slot_no = 20877064
     start_sync = time.perf_counter()
 
     while actual_slot <= latest_slot_no:
@@ -445,8 +448,9 @@ def wait_for_node_to_sync(env, tag_no):
               f" - actual_block: {actual_block} "
               f" - actual_slot : {actual_slot}")
         if actual_era not in eras_start_time_dict:
-            current_time = datetime.utcnow()
-            eras_start_time_dict[actual_era] = current_time
+            actual_era_start_time = "TBD"
+            actual_era_dict = {"start_epoch": actual_epoch, "start_time": actual_era_start_time}
+            eras_start_time_dict[actual_era] = actual_era_dict
 
         time.sleep(1)
         count += 1
@@ -455,20 +459,16 @@ def wait_for_node_to_sync(env, tag_no):
 
     end_sync = time.perf_counter()
 
-    sync_time_seconds = int(start_sync - end_sync)
+    sync_time_seconds = int(end_sync - start_sync)
     print(f"sync_time_seconds: {sync_time_seconds}")
 
     os.chdir(Path(ROOT_TEST_PATH) / "db" / "immutable")
     chunk_files = sorted(os.listdir(os.getcwd()), key=os.path.getmtime)
-    newest_chunk = chunk_files[-1]
+    latest_chunk_no = chunk_files[-1]
     os.chdir(Path(ROOT_TEST_PATH))
-    print(f"Sync done!; newest_chunk: {newest_chunk}")
+    print(f"Sync done!; latest_chunk_no: {latest_chunk_no}")
 
-    byron_sync_time_seconds, shelley_sync_time_seconds, allegra_sync_time_seconds = 0, 0, 0
-    mary_sync_time_seconds = sync_time_seconds
-
-    return newest_chunk, byron_sync_time_seconds, shelley_sync_time_seconds, \
-           allegra_sync_time_seconds, mary_sync_time_seconds, eras_start_time_dict
+    return sync_time_seconds, latest_chunk_no, eras_start_time_dict
 
 
 def date_diff_in_seconds(dt2, dt1):
@@ -477,40 +477,22 @@ def date_diff_in_seconds(dt2, dt1):
 
 
 def get_calculated_slot_no(env):
-    current_time = datetime.utcnow()
-    shelley_start_time = byron_start_time = allegra_start_time = mary_start_time = current_time
+    global shelley_start_time, byron_start_time
 
     if env == "testnet":
         byron_start_time = datetime.strptime("2019-07-24 20:20:16", "%Y-%m-%d %H:%M:%S")
         shelley_start_time = datetime.strptime("2020-07-28 20:20:16", "%Y-%m-%d %H:%M:%S")
-        allegra_start_time = datetime.strptime("2020-12-15 20:20:16", "%Y-%m-%d %H:%M:%S")
-        mary_start_time = datetime.strptime("2021-02-03 20:20:16", "%Y-%m-%d %H:%M:%S")
     elif env == "staging":
         byron_start_time = datetime.strptime("2017-09-26 18:23:33", "%Y-%m-%d %H:%M:%S")
         shelley_start_time = datetime.strptime("2020-08-01 18:23:33", "%Y-%m-%d %H:%M:%S")
-        allegra_start_time = datetime.strptime("2020-12-19 18:23:33", "%Y-%m-%d %H:%M:%S")
-        mary_start_time = datetime.strptime("2021-01-28 18:23:33", "%Y-%m-%d %H:%M:%S")
     elif env == "mainnet":
         byron_start_time = datetime.strptime("2017-09-23 21:44:51", "%Y-%m-%d %H:%M:%S")
         shelley_start_time = datetime.strptime("2020-07-29 21:44:51", "%Y-%m-%d %H:%M:%S")
-        allegra_start_time = datetime.strptime("2020-12-16 21:44:51", "%Y-%m-%d %H:%M:%S")
     elif env == "shelley_qa":
         byron_start_time = datetime.strptime("2020-08-17 13:00:00", "%Y-%m-%d %H:%M:%S")
         shelley_start_time = datetime.strptime("2020-08-17 17:00:00", "%Y-%m-%d %H:%M:%S")
-        allegra_start_time = datetime.strptime("2020-12-07 19:00:00", "%Y-%m-%d %H:%M:%S")
-        mary_start_time = datetime.strptime("2021-01-30 01:00:00", "%Y-%m-%d %H:%M:%S")
 
-    last_byron_slot_no = int(date_diff_in_seconds(shelley_start_time, byron_start_time) / 20)
-    last_shelley_slot_no = int(date_diff_in_seconds(allegra_start_time, shelley_start_time) +
-                               last_byron_slot_no)
-    last_allegra_slot_no = int(date_diff_in_seconds(mary_start_time, shelley_start_time) +
-                               last_byron_slot_no)
-
-    if mary_start_time != current_time:
-        last_mary_slot_no = int(date_diff_in_seconds(current_time, mary_start_time) +
-                                last_allegra_slot_no)
-    else:
-        last_mary_slot_no = 0
+    current_time = datetime.utcnow()
 
     latest_slot_no = int(date_diff_in_seconds(shelley_start_time, byron_start_time) / 20 +
                          date_diff_in_seconds(current_time, shelley_start_time))
@@ -518,17 +500,11 @@ def get_calculated_slot_no(env):
     print("----------------------------------------------------------------")
     print(f"byron_start_time        : {byron_start_time}")
     print(f"shelley_start_time      : {shelley_start_time}")
-    print(f"allegra_start_time      : {allegra_start_time}")
-    print(f"mary_start_time         : {mary_start_time}")
     print(f"current_utc_time        : {current_time}")
-    print(f"last_byron_slot_no      : {last_byron_slot_no}")
-    print(f"last_shelley_slot_no    : {last_shelley_slot_no}")
-    print(f"last_allegra_slot_no    : {last_allegra_slot_no}")
-    print(f"last_mary_slot_no       : {last_mary_slot_no}")
     print(f"latest_slot_no          : {latest_slot_no}")
     print("----------------------------------------------------------------")
 
-    return last_byron_slot_no, last_shelley_slot_no, last_allegra_slot_no, latest_slot_no
+    return latest_slot_no
 
 
 def main():
@@ -585,57 +561,50 @@ def main():
         secs_to_start1 = start_node_windows(env, tag_no1)
 
     print(" - waiting for the node to sync")
-    (
-        newest_chunk1,
-        byron_sync_time_seconds1,
-        shelley_sync_time_seconds1,
-        allegra_sync_time_seconds1,
-        mary_sync_time_seconds1,
-        sync_details_dict1
-    ) = wait_for_node_to_sync(env, tag_no1)
+    (sync_time_seconds, latest_chunk_no, eras_start_time_dict) = wait_for_node_to_sync(env, tag_no1)
 
     print("++++++++++++++++++++++++++++++++++++++++++++++")
-    print(f"sync_details_dict1: {sync_details_dict1}")
-    for era in sync_details_dict1:
-        print(f"{era} --> {sync_details_dict1[era]}")
+    print(f"eras_start_time_dict: {eras_start_time_dict}")
+    for era in eras_start_time_dict:
+        print(f"{era} --> {eras_start_time_dict[era]}")
     print("++++++++++++++++++++++++++++++++++++++++++++++")
 
     end_sync_time1 = get_current_date_time()
     print(f"secs_to_start1            : {secs_to_start1}")
     print(f"start_sync_time1          : {start_sync_time1}")
     print(f"end_sync_time1            : {end_sync_time1}")
-    print(f"byron_sync_time_seconds1  : {byron_sync_time_seconds1}")
-    print(
-        f"byron_sync_time1  : {time.strftime('%H:%M:%S', time.gmtime(byron_sync_time_seconds1))}"
-    )
-    print(f"shelley_sync_time_seconds1: {shelley_sync_time_seconds1}")
-    print(
-        f"shelley_sync_time1: {time.strftime('%H:%M:%S', time.gmtime(shelley_sync_time_seconds1))}"
-    )
-    print(f"allegra_sync_time_seconds1: {allegra_sync_time_seconds1}")
-    print(
-        f"allegra_sync_time_seconds1: {time.strftime('%H:%M:%S', time.gmtime(allegra_sync_time_seconds1))}"
-    )
-    print(f"mary_sync_time_seconds1: {mary_sync_time_seconds1}")
-    print(
-        f"mary_sync_time_seconds1: {time.strftime('%H:%M:%S', time.gmtime(mary_sync_time_seconds1))}"
-    )
+    # print(f"byron_sync_time_seconds1  : {byron_sync_time_seconds1}")
+    # print(
+    #     f"byron_sync_time1  : {time.strftime('%H:%M:%S', time.gmtime(byron_sync_time_seconds1))}"
+    # )
+    # print(f"shelley_sync_time_seconds1: {shelley_sync_time_seconds1}")
+    # print(
+    #     f"shelley_sync_time1: {time.strftime('%H:%M:%S', time.gmtime(shelley_sync_time_seconds1))}"
+    # )
+    # print(f"allegra_sync_time_seconds1: {allegra_sync_time_seconds1}")
+    # print(
+    #     f"allegra_sync_time_seconds1: {time.strftime('%H:%M:%S', time.gmtime(allegra_sync_time_seconds1))}"
+    # )
+    # print(f"mary_sync_time_seconds1: {mary_sync_time_seconds1}")
+    # print(
+    #     f"mary_sync_time_seconds1: {time.strftime('%H:%M:%S', time.gmtime(mary_sync_time_seconds1))}"
+    # )
 
     latest_block_no1 = get_current_tip(tag_no1)[0]
     latest_slot_no1 = get_current_tip(tag_no1)[2]
-    sync_speed_bps1 = int(
-        latest_block_no1 / (
-                byron_sync_time_seconds1 + shelley_sync_time_seconds1 + allegra_sync_time_seconds1 + mary_sync_time_seconds1)
-    )
-    sync_speed_sps1 = int(
-        latest_slot_no1 / (
-                byron_sync_time_seconds1 + shelley_sync_time_seconds1 + allegra_sync_time_seconds1 + mary_sync_time_seconds1)
-    )
-    print(f"sync_speed_bps1   : {sync_speed_bps1}")
-    print(f"sync_speed_sps1   : {sync_speed_sps1}")
-
-    total_chunks1 = int(newest_chunk1.split(".")[0])
-    print(f"downloaded chunks1: {total_chunks1}")
+    # sync_speed_bps1 = int(
+    #     latest_block_no1 / (
+    #             byron_sync_time_seconds1 + shelley_sync_time_seconds1 + allegra_sync_time_seconds1 + mary_sync_time_seconds1)
+    # )
+    # sync_speed_sps1 = int(
+    #     latest_slot_no1 / (
+    #             byron_sync_time_seconds1 + shelley_sync_time_seconds1 + allegra_sync_time_seconds1 + mary_sync_time_seconds1)
+    # )
+    # print(f"sync_speed_bps1   : {sync_speed_bps1}")
+    # print(f"sync_speed_sps1   : {sync_speed_sps1}")
+    #
+    # total_chunks1 = int(newest_chunk1.split(".")[0])
+    # print(f"downloaded chunks1: {total_chunks1}")
 
     (
         cardano_cli_version2,
@@ -719,7 +688,7 @@ def main():
         print(f"sync_speed_bps2   : {sync_speed_bps2}")
         print(f"sync_speed_sps2   : {sync_speed_sps2}")
 
-        total_chunks2 = int(newest_chunk1.split(".")[0])
+        # total_chunks2 = int(newest_chunk1.split(".")[0])
         print(f"downloaded chunks2: {total_chunks2}")
 
     chain_size = get_size(Path(ROOT_TEST_PATH) / "db")
@@ -729,45 +698,45 @@ def main():
     current_directory = Path.cwd()
     print(f" - sync_tests listdir: {os.listdir(current_directory)}")
 
-    test_values = (
-        env,
-        tag_no1,
-        tag_no2,
-        cardano_cli_version1,
-        cardano_cli_version2,
-        cardano_cli_git_rev1,
-        cardano_cli_git_rev2,
-        start_sync_time1,
-        end_sync_time1,
-        start_sync_time2,
-        end_sync_time2,
-        byron_sync_time_seconds1,
-        shelley_sync_time_seconds1,
-        allegra_sync_time_seconds1,
-        mary_sync_time_seconds1,
-        sync_time_after_restart_seconds,
-        total_chunks1,
-        total_chunks2,
-        latest_block_no1,
-        latest_block_no2,
-        latest_slot_no1,
-        latest_slot_no2,
-        secs_to_start1,
-        secs_to_start2,
-        platform_system,
-        platform_release,
-        platform_version,
-        chain_size,
-        json.dumps(sync_details_dict1),
-    )
+    # test_values = (
+    #     env,
+    #     tag_no1,
+    #     tag_no2,
+    #     cardano_cli_version1,
+    #     cardano_cli_version2,
+    #     cardano_cli_git_rev1,
+    #     cardano_cli_git_rev2,
+    #     start_sync_time1,
+    #     end_sync_time1,
+    #     start_sync_time2,
+    #     end_sync_time2,
+    #     byron_sync_time_seconds1,
+    #     shelley_sync_time_seconds1,
+    #     allegra_sync_time_seconds1,
+    #     mary_sync_time_seconds1,
+    #     sync_time_after_restart_seconds,
+    #     total_chunks1,
+    #     total_chunks2,
+    #     latest_block_no1,
+    #     latest_block_no2,
+    #     latest_slot_no1,
+    #     latest_slot_no2,
+    #     secs_to_start1,
+    #     secs_to_start2,
+    #     platform_system,
+    #     platform_release,
+    #     platform_version,
+    #     chain_size,
+    #     json.dumps(sync_details_dict1),
+    # )
 
-    print(f"test_values: {test_values}")
-
-    with open("sync_results.log", "w+") as file1:
-        file1.write(str(test_values))
-
-    current_directory = Path.cwd()
-    print(f" - sync_tests listdir: {os.listdir(current_directory)}")
+    # print(f"test_values: {test_values}")
+    #
+    # with open("sync_results.log", "w+") as file1:
+    #     file1.write(str(test_values))
+    #
+    # current_directory = Path.cwd()
+    # print(f" - sync_tests listdir: {os.listdir(current_directory)}")
 
 
 if __name__ == "__main__":
