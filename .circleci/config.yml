@@ -116,7 +116,7 @@ workflows:
             parameters:
               os: [ linux, macos, windows ]
 #              env: [shelley_qa, testnet, staging, mainnet]
-              env: [shelley_qa]
+              env: [mainnet]
           name: test-on-<< matrix.os >>-with-env-<< matrix.env >>
 #          post-steps: # steps to run after steps defined in the job bar
 #            - run:
