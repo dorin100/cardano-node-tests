@@ -20,12 +20,53 @@ NODE = "./cardano-node"
 CLI = "./cardano-cli"
 ROOT_TEST_PATH = ""
 
+MAINNET_EXPLORER_URL = "https://explorer.cardano.org/graphql"
+STAGING_EXPLORER_URL = "https://explorer.staging.cardano.org/graphql"
+TESTNET_EXPLORER_URL = "https://explorer.cardano-testnet.iohkdev.io/graphql"
+SHELEY_QA_EXPLORER_URL = "https://explorer.shelley-qa.dev.cardano.org/graphql"
+
 
 def set_repo_paths():
     global ROOT_TEST_PATH
     ROOT_TEST_PATH = Path.cwd()
 
     print(f"ROOT_TEST_PATH: {ROOT_TEST_PATH}")
+
+
+def get_epoch_start_datetime(env, epoch_no):
+    global res
+    headers = {'Content-type': 'application/json'}
+    payload = '{"query":"query searchForEpochByNumber($number: Int!) {\\n  epochs(where: {number: ' \
+              '{_eq: $number}}) {\\n    ...EpochOverview\\n  }\\n}\\n\\nfragment EpochOverview on ' \
+              'Epoch {\\n  blocks(limit: 1) {\\n    protocolVersion\\n  }\\n  blocksCount\\n  ' \
+              'lastBlockTime\\n  number\\n  startedAt\\n  output\\n  transactionsCount\\n}\\n",' \
+              '"variables":{"number":' + str(epoch_no) + '}} '
+
+    if env == "mainnet":
+        url = MAINNET_EXPLORER_URL
+        res = requests.post(url, data=payload, headers=headers)
+    elif env == "staging":
+        url = STAGING_EXPLORER_URL
+        res = requests.post(url, data=payload, headers=headers)
+    elif env == "testnet":
+        url = TESTNET_EXPLORER_URL
+        res = requests.post(url, data=payload, headers=headers)
+    elif env == "shelley_qa":
+        url = SHELEY_QA_EXPLORER_URL
+        res = requests.post(url, data=payload, headers=headers)
+    else:
+        print(f"ERROR: the provided 'env' is not supported. Please use one of: shelley_qa, "
+              f"testnet, staging, mainnet")
+        exit(1)
+
+    status_code = res.status_code
+    if status_code == 200:
+        return res.json()['data']['epochs'][0]['startedAt']
+    else:
+        print(f"status_code: {status_code}")
+        print(f"response: {res.text}")
+        print(f"ERROR: status_code =! 200 when getting start time for epoch {epoch_no} on {env}")
+        exit(1)
 
 
 def git_get_commit_sha_for_tag_no(tag_no):
@@ -448,7 +489,7 @@ def wait_for_node_to_sync(env, tag_no):
               f" - actual_block: {actual_block} "
               f" - actual_slot : {actual_slot}")
         if actual_era not in eras_start_time_dict:
-            actual_era_start_time = "TBD"
+            actual_era_start_time = get_epoch_start_datetime(env, actual_epoch)
             actual_era_dict = {"start_epoch": actual_epoch, "start_time": actual_era_start_time}
             eras_start_time_dict[actual_era] = actual_era_dict
 
