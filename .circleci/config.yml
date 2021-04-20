@@ -88,7 +88,6 @@ executors:
       xcode: 11.3.0
     resource_class: large
   windows: win/default
-    resource_class: 2xlarge # resource class, can be "medium", "large", "xlarge", "2xlarge", defaults to "medium" if not specified a
 
 jobs:
   sync_test:
